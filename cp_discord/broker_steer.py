@@ -1,4 +1,4 @@
-"""C1e — the RUECKKANAL for chat: a thread message becomes agent input (§6.0).
+"""C1e — the RETURN CHANNEL for chat: a thread message becomes agent input (§6.0).
 
 The seventh method, and the second thing that travels broker -> session.  It
 looks like :mod:`.broker_gates`' resolution push and is deliberately NOT in

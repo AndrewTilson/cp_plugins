@@ -1,4 +1,4 @@
-"""C1d — the HINWEG: a session's gate becomes a widget in its thread (§3.2b).
+"""C1d — the OUTBOUND PATH: a session's gate becomes a widget in its thread (§3.2b).
 
 The sixth method, and the one that was missing until R15.  Everything else on
 this wire travels session -> broker -> thread as TEXT; a gate has to travel as
@@ -72,7 +72,7 @@ RETRY_ATTEMPTS = 3
 RETRY_DELAY = 1.0
 
 #: What an undeliverable resolution says in the thread (INV-C17).
-UNDELIVERABLE = "Zustellung fehlgeschlagen — die Sitzung antwortet nicht."
+UNDELIVERABLE = "Delivery failed — the session is not responding."
 
 
 class Outcome:
@@ -291,7 +291,7 @@ def closing_text(params: Dict[str, Any]) -> str:
     title = str(params.get("title") or "").strip()
     if outcome and title:
         return f"**{title}** — {outcome}"
-    return outcome or title or "entschieden"
+    return outcome or title or "decided"
 
 
 def view_factory(

@@ -287,8 +287,8 @@ def test_title_without_a_repo_is_just_the_directory():
 def test_session_name_override_wins():
     """AC-12: ``--session-name`` overrides the whole derivation."""
     assert (
-        threads.session_title("/home/w/cp_plugins", branch="main", override="eigener")
-        == "eigener"
+        threads.session_title("/home/w/cp_plugins", branch="main", override="custom")
+        == "custom"
     )
 
 
@@ -603,7 +603,7 @@ def test_the_registry_records_a_thread_id(bridge_dir):
 
 
 def test_a_session_without_a_thread_may_claim_one(bridge_dir):
-    """Befund B: "known" is not "served" -- but only ONE ask goes out per gap.
+    """Finding B: "known" is not "served" -- but only ONE ask goes out per gap.
 
     Both halves matter.  Without the first, a registration that survived a
     Discord outage leaves the session threadless for good; without the second,
@@ -1209,7 +1209,7 @@ def test_a_lost_write_back_heals_without_a_second_thread(bridge_dir, channel):
 
 
 def test_the_created_thread_id_reaches_the_registry(bridge_dir, channel):
-    """Befund A: the id ``ensure_thread`` returns has to be WRITTEN DOWN.
+    """Finding A: the id ``ensure_thread`` returns has to be WRITTEN DOWN.
 
     Without it the column stays ``None`` forever, and
     ``adopt_registered_sessions`` finds nothing to adopt after a re-election --
@@ -1285,14 +1285,14 @@ def test_report_mode_shows_a_status_line_then_the_report(broker, gateway):
     register(broker)
 
     send_event(broker, 2, "state", {"state": "working", "message": "coding…"})
-    send_event(broker, 3, "report", {"chunks": ["letzte Antwort", "-> run_shell"]})
+    send_event(broker, 3, "report", {"chunks": ["last answer", "-> run_shell"]})
     send_event(
         broker,
         4,
         "state",
         {
             "state": "blocked",
-            "message": "wartet auf deine Freigabe",
+            "message": "waiting for your approval",
             "remote_resolvable": True,
         },
     )
@@ -1300,9 +1300,9 @@ def test_report_mode_shows_a_status_line_then_the_report(broker, gateway):
     bodies = gateway.bodies_for("cp_discord:a")
     assert bodies == [
         "coding…",
-        "letzte Antwort",
+        "last answer",
         "-> run_shell",
-        "wartet auf deine Freigabe",
+        "waiting for your approval",
     ]
 
 
@@ -1321,14 +1321,14 @@ def test_stream_deltas_arrive_live(broker, gateway):
     register(broker)
 
     for index, text in enumerate(
-        ["schreibt a", "schreibt ab", "schreibt abc"], start=2
+        ["writing a", "writing ab", "writing abc"], start=2
     ):
         send_event(broker, index, "state", {"state": "working", "message": text})
 
     assert gateway.bodies_for("cp_discord:a") == [
-        "schreibt a",
-        "schreibt ab",
-        "schreibt abc",
+        "writing a",
+        "writing ab",
+        "writing abc",
     ]
 
 
@@ -1354,7 +1354,7 @@ def test_a_locally_answerable_block_is_marked_as_such(broker, gateway):
         "state",
         {
             "state": "blocked",
-            "message": "wartet auf eine Eingabe",
+            "message": "waiting for input",
             "remote_resolvable": False,
         },
     )
@@ -1396,7 +1396,7 @@ def test_a_gate_block_is_not_marked_as_local(broker, gateway):
         "state",
         {
             "state": "blocked",
-            "message": "wartet auf deine Freigabe",
+            "message": "waiting for your approval",
             "remote_resolvable": True,
         },
     )
@@ -1455,7 +1455,7 @@ def test_notices_are_announced_once(bridge_dir, gateway):
     from cp_discord import broker_server
 
     broker_instance = broker_server.Broker(
-        gateway, token="s3cret", notices=("eine Warnung",)
+        gateway, token="s3cret", notices=("a warning",)
     )
     broker_instance.start()
     try:
@@ -1636,7 +1636,7 @@ def test_an_undeliverable_resolution_is_reported_in_the_thread(broker, gateway):
 
     assert delivered is False
     assert any(
-        "Zustellung fehlgeschlagen" in body
+        "Delivery failed" in body
         for body in gateway.bodies_for("cp_discord:a")
     )
 
@@ -1934,7 +1934,7 @@ def test_a_stale_portfile_does_not_block_the_election(
 
     monkeypatch.setattr(broker_activation, "ELECTION_RETRY_DELAY", 0.0)
     election.write_portfile(
-        election.BrokerAddress(port=_closed_port(), token="vom-toten-broker")
+        election.BrokerAddress(port=_closed_port(), token="from-dead-broker")
     )
 
     successor = supervisor_factory()
@@ -1955,13 +1955,13 @@ def test_a_stale_portfiles_token_is_still_adopted(
 
     monkeypatch.setattr(broker_activation, "ELECTION_RETRY_DELAY", 0.0)
     election.write_portfile(
-        election.BrokerAddress(port=_closed_port(), token="vom-toten-broker")
+        election.BrokerAddress(port=_closed_port(), token="from-dead-broker")
     )
 
     successor = supervisor_factory()
     successor.run_election_round()
 
-    assert successor.broker.token == "vom-toten-broker"
+    assert successor.broker.token == "from-dead-broker"
 
 
 def test_a_reachable_broker_is_left_alone(supervisor_factory, monkeypatch):
@@ -2085,11 +2085,11 @@ def test_the_gateway_never_blocks_the_caller(discord_gateway, channel):
     discord_gateway.wait_idle()
     channel.threads[0].send = slow_send
 
-    discord_gateway.post("cp_discord:a", "erste")
+    discord_gateway.post("cp_discord:a", "first")
     assert entered.wait(5), "the slow send never started"
 
     started = time.monotonic()
-    discord_gateway.post("cp_discord:a", "zweite")
+    discord_gateway.post("cp_discord:a", "second")
     elapsed = time.monotonic() - started
     release.set()
 
@@ -2147,11 +2147,11 @@ def test_the_gateway_adopts_registered_sessions(discord_gateway, channel):
     discord_gateway.adopt([a_record(thread_id=4242)])
     discord_gateway.wait_idle()
 
-    discord_gateway.post("cp_discord:a", "weiter geht es")
+    discord_gateway.post("cp_discord:a", "on we go")
     discord_gateway.wait_idle()
 
     assert len(channel.threads) == 1
-    assert existing.messages == ["weiter geht es"]
+    assert existing.messages == ["on we go"]
 
 
 # --------------------------------------------------------------------------- #

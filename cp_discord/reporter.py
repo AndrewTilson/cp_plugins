@@ -61,14 +61,14 @@ MODE_STREAM = "stream"
 ACTIVITY_CODING = "coding…"
 
 #: What a gate says.  It is answerable from the phone, so it says nothing else.
-BLOCKED_ON_GATE = "wartet auf deine Freigabe"
+BLOCKED_ON_GATE = "waiting for your approval"
 
 #: INV-C23: a wait the phone CANNOT resolve must say so.  ``notify=False`` is
 #: not enough of a filter -- only ``model_picker_completion.py:591`` sets it,
 #: while ``agent_menu.py:644``, ``autosave_menu.py:885``, ``set_menu.py:171``
 #: and ``judges_menu.py:754`` run with the default.
-LOCAL_ONLY_MARKER = "nur am PC beantwortbar"
-BLOCKED_LOCALLY = f"wartet auf eine Eingabe — {LOCAL_ONLY_MARKER}"
+LOCAL_ONLY_MARKER = "can only be answered on the PC"
+BLOCKED_LOCALLY = f"waiting for input — {LOCAL_ONLY_MARKER}"
 
 #: §8b: at most one decorative edit every two seconds.
 DEFAULT_MIN_INTERVAL = 2.0

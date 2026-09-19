@@ -18,7 +18,7 @@ knows about sessions, so both are reusable as they are.
 entries or 8 KB, whichever bites first.  Dropping quietly would be worse than
 dropping loudly -- a report that silently omits the destructive command is
 exactly the report somebody approves without reading.  So an overflow says
-``… (n weitere)`` and a truncated message says so too.
+``… (n more)`` and a truncated message says so too.
 
 **Nothing here waits.**  The hooks run on the agent's own path; they append to
 a bounded buffer and return ``None``, which is what keeps the collector from
@@ -71,10 +71,10 @@ MAX_BYTES = 8 * 1024
 
 #: What an overflow looks like.  It is CONTENT, not a log line: it goes into
 #: the message so the reader knows the list is incomplete.
-OVERFLOW_TEMPLATE = "… ({count} weitere)"
+OVERFLOW_TEMPLATE = "… ({count} more)"
 
 #: The same courtesy for a message whose beginning had to go.
-TRUNCATION_MARKER = "… (Anfang gekuerzt)"
+TRUNCATION_MARKER = "… (beginning truncated)"
 
 #: How much of the running answer ``stream`` mode shows in the status line.
 #: The slot is latest-wins, so this is a window on the newest text, not a

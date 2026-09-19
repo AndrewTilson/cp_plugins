@@ -64,9 +64,9 @@ logger = logging.getLogger(__name__)
 SENTINEL = "_cp_discord"
 
 #: What the channel is told when the other side answered first (AC-37/39).
-DECIDED_IN_TERMINAL = "im Terminal entschieden"
-DECIDED_IN_DISCORD = "in Discord entschieden"
-GATE_EXPIRED = "abgelaufen - nur noch am PC beantwortbar"
+DECIDED_IN_TERMINAL = "decided in the terminal"
+DECIDED_IN_DISCORD = "decided in Discord"
+GATE_EXPIRED = "expired - can only be answered on the PC now"
 
 #: How often the waiting backend re-checks whether both branches are done.
 #: Short, because it also bounds how long a branch ABORT (as opposed to an
@@ -240,7 +240,7 @@ def _close_gate(gate: Gate) -> None:
 def _start_discord_branch(gate: Gate) -> bool:
     """Put the gate in the thread.  ``False`` means the phone cannot answer.
 
-    A failed HINWEG is NOT a failure and NOT a branch winner (INV-C1, AC-92):
+    A failed OUTBOUND PATH is NOT a failure and NOT a branch winner (INV-C1, AC-92):
     it only means this gate has to be answered at the machine.
     """
     client = _active_client()

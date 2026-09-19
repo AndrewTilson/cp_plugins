@@ -766,7 +766,7 @@ def test_ac37_a_terminal_answer_closes_the_discord_gate(authz_db, prompts, disco
     assert discord.closed, "the gate was left live in the channel"
     gate_id, outcome, _title = discord.closed[0]
     assert gate_id == discord.submitted[0]["gate_id"]
-    assert "Terminal" in outcome
+    assert "terminal" in outcome
 
 
 def test_ac38_a_simultaneous_race_yields_exactly_one_resolution(

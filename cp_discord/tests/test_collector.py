@@ -314,7 +314,7 @@ def test_ac82_nothing_is_dropped_silently(mailbox, sink):
     _settle(mailbox)
 
     body = _text_of(sink.reports[-1])
-    assert "weitere" not in body, "exactly at the limit nothing overflowed"
+    assert "more" not in body, "exactly at the limit nothing overflowed"
 
 
 def test_ac82_the_byte_limit_bites_before_the_entry_limit(mailbox, sink):
@@ -339,7 +339,7 @@ def test_ac82_the_byte_limit_bites_before_the_entry_limit(mailbox, sink):
     state.on_run_end()
     _settle(mailbox)
 
-    assert "weitere" in _text_of(sink.reports[-1]), "and it has to say so"
+    assert "more" in _text_of(sink.reports[-1]), "and it has to say so"
 
 
 def test_ac82_the_buffer_never_grows_without_bound(mailbox):

@@ -213,7 +213,7 @@ class SessionClient:
         except Exception:
             logger.debug("cp_discord: delivering %r failed", event, exc_info=True)
 
-    # -- gates: the HINWEG (§3.2b) --------------------------------------
+    # -- gates: the OUTBOUND PATH (§3.2b) --------------------------------------
 
     def submit_gate(
         self,
@@ -232,7 +232,7 @@ class SessionClient:
         ``False`` means "this gate cannot be answered from the phone" -- no
         broker, no thread, Discord down.  It is emphatically not an error
         (INV-C1, AC-92): the terminal prompt runs regardless, and a failed
-        HINWEG is not a branch winner.
+        OUTBOUND PATH is not a branch winner.
 
         *remote_resolvable* travels because only C4 knows it, and the broker
         needs it to decide whether to attach buttons at all (INV-C23, AC-91).

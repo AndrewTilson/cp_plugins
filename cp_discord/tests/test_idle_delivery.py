@@ -176,34 +176,34 @@ def test_ac1_an_idle_steer_is_delivered_without_a_keystroke():
 
         threading.Thread(
             target=lambda: pause_module.get_pause_controller().request_steer(
-                "vom handy", "queue"
+                "from the phone", "queue"
             ),
             daemon=True,
         ).start()
 
         return await asyncio.wait_for(run_ui.wait_for_idle_submission(), timeout=5.0)
 
-    assert asyncio.run(scenario()) == "vom handy"
+    assert asyncio.run(scenario()) == "from the phone"
 
 
 def test_ac2_the_delivered_text_leaves_the_steer_queue(idle_ui, controller):
     idle_delivery.install()
 
-    _steer_from_thread("vom handy")
+    _steer_from_thread("from the phone")
     _settle(idle_ui)
 
     assert controller.peek_pending_steer_queued() == []
-    assert _drain(run_ui._idle_queue) == ["vom handy"]
+    assert _drain(run_ui._idle_queue) == ["from the phone"]
 
 
 def test_ac7_two_idle_messages_arrive_in_order(idle_ui, controller):
     idle_delivery.install()
 
-    _steer_from_thread("erste")
-    _steer_from_thread("zweite")
+    _steer_from_thread("first")
+    _steer_from_thread("second")
     _settle(idle_ui)
 
-    assert _drain(run_ui._idle_queue) == ["erste", "zweite"]
+    assert _drain(run_ui._idle_queue) == ["first", "second"]
     assert controller.peek_pending_steer_queued() == []
 
 
@@ -216,10 +216,10 @@ def test_ac3_a_run_in_flight_keeps_the_text_in_the_steer_queue(idle_ui, controll
     run_ui._run_active = True
     idle_delivery.install()
 
-    _steer_from_thread("waehrend des laufs")
+    _steer_from_thread("during the run")
     _settle(idle_ui)
 
-    assert controller.peek_pending_steer_queued() == ["waehrend des laufs"]
+    assert controller.peek_pending_steer_queued() == ["during the run"]
     assert _drain(run_ui._idle_queue) == []
 
 
@@ -228,17 +228,17 @@ def test_ac10_the_queue_menu_path_is_untouched_during_a_run(idle_ui, controller)
     run_ui._run_active = True
     idle_delivery.install()
 
-    _steer_from_thread("eins")
-    _steer_from_thread("zwei")
+    _steer_from_thread("one")
+    _steer_from_thread("two")
     _settle(idle_ui)
 
     seen = controller.peek_pending_steer_queued()
-    assert seen == ["eins", "zwei"]
+    assert seen == ["one", "two"]
 
     controller.replace_pending_steer_queued(seen)
     _settle(idle_ui)
 
-    assert controller.peek_pending_steer_queued() == ["eins", "zwei"]
+    assert controller.peek_pending_steer_queued() == ["one", "two"]
     assert _drain(run_ui._idle_queue) == []
 
 
@@ -251,10 +251,10 @@ def test_ac4_the_classic_prompt_path_keeps_its_text(idle_ui, controller):
     run_ui._persistent = False
     idle_delivery.install()
 
-    _steer_from_thread("klassischer pfad")
+    _steer_from_thread("classic path")
     _settle(idle_ui)
 
-    assert controller.peek_pending_steer_queued() == ["klassischer pfad"]
+    assert controller.peek_pending_steer_queued() == ["classic path"]
 
 
 def test_ac5_a_missing_idle_queue_keeps_the_text(idle_ui, controller):
@@ -276,9 +276,9 @@ def test_ac6_a_closed_loop_keeps_the_text_and_does_not_crash(loop, controller):
     idle_delivery.install()
     loop.close()
 
-    _steer_from_thread("geschlossener loop")
+    _steer_from_thread("closed loop")
 
-    assert controller.peek_pending_steer_queued() == ["geschlossener loop"]
+    assert controller.peek_pending_steer_queued() == ["closed loop"]
 
 
 @pytest.mark.parametrize("loop_state", ["missing", "closed"])
@@ -294,9 +294,9 @@ def test_ac23_no_loop_at_listener_time_means_no_pop(loop, controller, loop_state
         loop.close()
     idle_delivery.install()
 
-    _steer_from_thread("kein loop")
+    _steer_from_thread("no loop")
 
-    assert controller.peek_pending_steer_queued() == ["kein loop"]
+    assert controller.peek_pending_steer_queued() == ["no loop"]
     assert _drain(run_ui._idle_queue) == []
 
 
@@ -310,7 +310,7 @@ def test_ac8_the_display_is_correct_when_it_registered_first(idle_ui, controller
     controller.add_steer_queue_listener(display)
     idle_delivery.install()
 
-    _steer_from_thread("anzeige")
+    _steer_from_thread("display")
     _settle(idle_ui)
 
     assert display.counts[-1] == len(controller.peek_pending_steer_queued()) == 0
@@ -322,7 +322,7 @@ def test_ac9_the_display_is_correct_when_it_registered_last(idle_ui, controller)
     display = _Display()
     controller.add_steer_queue_listener(display)
 
-    _steer_from_thread("anzeige")
+    _steer_from_thread("display")
     _settle(idle_ui)
 
     assert display.counts[-1] == len(controller.peek_pending_steer_queued()) == 0
@@ -337,7 +337,7 @@ def test_ac15_a_throwing_listener_is_caught_and_logged(idle_ui, monkeypatch, cap
     """``_fire_steer_queue_listeners`` swallows everything (``:195-198``)."""
 
     def boom() -> None:
-        raise RuntimeError("kaputt")
+        raise RuntimeError("broken")
 
     monkeypatch.setattr(run_ui, "_get_loop", boom)
     idle_delivery.install()
@@ -346,7 +346,7 @@ def test_ac15_a_throwing_listener_is_caught_and_logged(idle_ui, monkeypatch, cap
         idle_delivery._on_steer_queued(1)
 
     assert any(
-        "kaputt" in record.getMessage() or record.exc_info for record in caplog.records
+        "broken" in record.getMessage() or record.exc_info for record in caplog.records
     )
 
 
@@ -375,10 +375,10 @@ def test_ac18_after_uninstall_nothing_is_delivered(idle_ui, controller):
     idle_delivery.install()
     idle_delivery.uninstall()
 
-    _steer_from_thread("nach dem abbau")
+    _steer_from_thread("after teardown")
     _settle(idle_ui)
 
-    assert controller.peek_pending_steer_queued() == ["nach dem abbau"]
+    assert controller.peek_pending_steer_queued() == ["after teardown"]
     assert _drain(run_ui._idle_queue) == []
 
 
@@ -402,12 +402,12 @@ def test_ac12_coexisting_with_the_core_fix_executes_the_text_once(idle_ui, contr
     run_ui._register_steer_wakeup()
     idle_delivery.install()
 
-    _steer_from_thread("genau einmal")
+    _steer_from_thread("exactly once")
     _settle(idle_ui)
 
     delivered = _drain(run_ui._idle_queue)
 
-    assert delivered.count("genau einmal") == 1
+    assert delivered.count("exactly once") == 1
     assert controller.peek_pending_steer_queued() == []
 
 
@@ -429,11 +429,11 @@ def test_ac20_the_pop_refires_the_listeners_without_recursing(
     monkeypatch.setattr(idle_delivery, "_deliver", traced)
     idle_delivery.install()
 
-    _steer_from_thread("reentranz")
+    _steer_from_thread("reentrancy")
     _settle(idle_ui)
 
     assert depth["max"] == 1, "the delivery must not nest inside itself"
-    assert _drain(run_ui._idle_queue) == ["reentranz"]
+    assert _drain(run_ui._idle_queue) == ["reentrancy"]
 
 
 def test_ac21_the_second_deliver_never_pushes_none(idle_ui, controller, monkeypatch):
@@ -452,11 +452,11 @@ def test_ac21_the_second_deliver_never_pushes_none(idle_ui, controller, monkeypa
     monkeypatch.setattr(run_ui, "_push_idle", recording)
     idle_delivery.install()
 
-    _steer_from_thread("einmal")
+    _steer_from_thread("once")
     _settle(idle_ui)
 
-    assert pushed == ["einmal"], "the empty round must not push anything"
-    assert _drain(run_ui._idle_queue) == ["einmal"]
+    assert pushed == ["once"], "the empty round must not push anything"
+    assert _drain(run_ui._idle_queue) == ["once"]
 
 
 # --------------------------------------------------------------------------- #
@@ -552,8 +552,8 @@ def test_ac22_deliver_does_not_deadlock_on_the_core_lock(
 def test_ac24_teardown_between_snapshot_and_push_loses_the_text_but_warns(
     idle_ui, controller, monkeypatch
 ):
-    """Charakterisierungstest. Wird er rot, wurde die Einschraenkung im Kern
-    behoben — dann diesen Test loeschen, nicht das Plugin anpassen.
+    """Characterisation test. If it fails, the core limitation has been
+    fixed — delete this test rather than changing the plugin.
 
     The window from SPEC R3: the lock MUST fall after the snapshot, so the UI
     can disappear before the push lands.  Monkeypatching the pop is the only
@@ -561,7 +561,7 @@ def test_ac24_teardown_between_snapshot_and_push_loses_the_text_but_warns(
     """
     warned: List[str] = []
     monkeypatch.setattr(run_ui, "_warn_command_dropped", warned.append)
-    controller.request_steer("verloren", "queue")
+    controller.request_steer("lost", "queue")
 
     real_pop = controller.pop_next_steer_queued
 
@@ -575,20 +575,20 @@ def test_ac24_teardown_between_snapshot_and_push_loses_the_text_but_warns(
     idle_delivery._deliver()
 
     assert controller.peek_pending_steer_queued() == []
-    assert warned == ["verloren"], "the loss must not be silent"
+    assert warned == ["lost"], "the loss must not be silent"
 
 
 def test_ac26_a_run_starting_after_the_snapshot_reroutes_the_text(
     idle_ui, controller, monkeypatch
 ):
-    """Charakterisierungstest. Wird er rot, wurde die Einschraenkung im Kern
-    behoben — dann diesen Test loeschen, nicht das Plugin anpassen.
+    """Characterisation test. If it fails, the core limitation has been
+    fixed — delete this test rather than changing the plugin.
 
     The window from SPEC R2: nothing is LOST, but the text changes lane -- it
     goes through the idle queue and runs as a fresh turn afterwards instead of
     being fed into the run in flight.
     """
-    controller.request_steer("umgeleitet", "queue")
+    controller.request_steer("rerouted", "queue")
     real_pop = controller.pop_next_steer_queued
 
     def run_starts_then_pops() -> Optional[str]:
@@ -601,14 +601,14 @@ def test_ac26_a_run_starting_after_the_snapshot_reroutes_the_text(
     _settle(idle_ui)
 
     assert controller.peek_pending_steer_queued() == []
-    assert _drain(run_ui._idle_queue) == ["umgeleitet"]
+    assert _drain(run_ui._idle_queue) == ["rerouted"]
 
 
 def test_ac27_a_pushed_text_can_die_with_the_ui_without_any_warning(
     idle_ui, controller, monkeypatch
 ):
-    """Charakterisierungstest. Wird er rot, wurde die Einschraenkung im Kern
-    behoben — dann diesen Test loeschen, nicht das Plugin anpassen.
+    """Characterisation test. If it fails, the core limitation has been
+    fixed — delete this test rather than changing the plugin.
 
     The SECOND, wider window from SPEC R3: the push SUCCEEDS and the text then
     waits in ``_idle_queue`` until the REPL ends.  ``_warn_command_dropped``
@@ -622,13 +622,13 @@ def test_ac27_a_pushed_text_can_die_with_the_ui_without_any_warning(
     monkeypatch.setattr(run_ui, "_warn_command_dropped", warned.append)
     idle_delivery.install()
 
-    _steer_from_thread("still verloren")
+    _steer_from_thread("silently lost")
     _settle(idle_ui)
 
     orphaned = run_ui._idle_queue
     run_ui._idle_queue = None
 
-    assert _drain(orphaned) == ["still verloren"]
+    assert _drain(orphaned) == ["silently lost"]
     assert warned == [], "the second window is silent -- that is the point"
     with pytest.raises(EOFError):
         idle_ui.run_until_complete(run_ui.wait_for_idle_submission())
@@ -648,13 +648,13 @@ def test_a_dead_loop_in_deliver_leaves_the_text_in_the_steer_queue(idle_ui, cont
     green.  Calling ``_deliver`` directly is the only way the guard is reached.
     """
     idle_delivery.install()
-    controller.request_steer("loop stirbt dazwischen", mode="queue")
+    controller.request_steer("loop dies in between", mode="queue")
 
     run_ui._loop = None  # the UI went away between listener and delivery
 
     idle_delivery._deliver()
 
-    assert controller.peek_pending_steer_queued() == ["loop stirbt dazwischen"]
+    assert controller.peek_pending_steer_queued() == ["loop dies in between"]
     assert _drain(run_ui._idle_queue) == []
 
 
@@ -730,7 +730,7 @@ def test_a_failure_after_the_pop_says_the_message_is_gone(idle_ui, controller, c
     suite green.
     """
     idle_delivery.install()
-    controller.request_steer("verloren", mode="queue")
+    controller.request_steer("lost", mode="queue")
 
     def _boom(item):
         raise RuntimeError("push exploded")
@@ -756,7 +756,7 @@ def test_a_failure_before_the_pop_says_the_message_is_safe(idle_ui, controller, 
     window -- the text is still in the steer queue here.
     """
     idle_delivery.install()
-    controller.request_steer("noch da", mode="queue")
+    controller.request_steer("still here", mode="queue")
 
     original = idle_delivery._pop_next_queued_steer
 
@@ -770,7 +770,7 @@ def test_a_failure_before_the_pop_says_the_message_is_safe(idle_ui, controller, 
     finally:
         idle_delivery._pop_next_queued_steer = original
 
-    assert controller.peek_pending_steer_queued() == ["noch da"], "still safe"
+    assert controller.peek_pending_steer_queued() == ["still here"], "still safe"
     assert any(
         "still in the steer queue" in record.message for record in caplog.records
     ), "a non-loss must not be reported as a loss"
@@ -790,18 +790,18 @@ def test_editing_the_queue_while_idle_runs_the_entries(idle_ui, controller):
     Pinned so the behaviour is a decision on record, not a surprise.
     """
     run_ui._run_active = True
-    controller.request_steer("erster", mode="queue")
-    controller.request_steer("zweiter", mode="queue")
+    controller.request_steer("first", mode="queue")
+    controller.request_steer("second", mode="queue")
     run_ui._run_active = False
 
     idle_delivery.install()
     _settle(idle_ui)
     assert _drain(run_ui._idle_queue) == [], "installing alone delivers nothing"
 
-    controller.replace_pending_steer_queued(["erster-editiert", "zweiter"])
+    controller.replace_pending_steer_queued(["first-edited", "second"])
     _settle(idle_ui)
 
-    assert _drain(run_ui._idle_queue) == ["erster-editiert", "zweiter"]
+    assert _drain(run_ui._idle_queue) == ["first-edited", "second"]
     assert controller.peek_pending_steer_queued() == []
 
 

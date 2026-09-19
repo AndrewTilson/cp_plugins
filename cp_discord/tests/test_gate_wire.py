@@ -1,4 +1,4 @@
-"""The HINWEG: a gate travels session -> broker -> Discord thread (SPEC §3.2b).
+"""The OUTBOUND PATH: a gate travels session -> broker -> Discord thread (SPEC §3.2b).
 
 This suite owns the WIRE half of AC-90/91/92: the sixth method ``M_GATE``, the
 client's ``submit_gate``/``close_gate``, and the gateway's ``post_gate``/
@@ -305,7 +305,7 @@ def test_a_locally_only_gate_is_still_readable(broker, gateway, session, channel
 
 
 # --------------------------------------------------------------------------- #
-# AC-92 — a failed HINWEG never disturbs the session (INV-C1)
+# AC-92 — a failed OUTBOUND PATH never disturbs the session (INV-C1)
 # --------------------------------------------------------------------------- #
 
 
@@ -844,12 +844,12 @@ def test_closing_a_gate_edits_the_message_and_kills_the_buttons(
     instance.submit_gate("g1", "Shell Command", "ls")
     gateway.wait_idle()
 
-    assert instance.close_gate("g1", "im Terminal entschieden") is True
+    assert instance.close_gate("g1", "decided in the terminal") is True
     gateway.wait_idle()
 
     message = posted_gate(channel)
     assert message.edits, "the gate message was never finalised"
-    assert "im Terminal entschieden" in message.content
+    assert "decided in the terminal" in message.content
     assert all(item.disabled for item in message.view.children)
 
 
@@ -867,10 +867,10 @@ def test_closing_a_widgetless_gate_still_reports_the_outcome(
     instance.submit_gate("g1", "Shell Command", "ls", remote_resolvable=False)
     gateway.wait_idle()
 
-    instance.close_gate("g1", "im Terminal entschieden")
+    instance.close_gate("g1", "decided in the terminal")
     gateway.wait_idle()
 
-    assert "im Terminal entschieden" in channel.threads[0].sent[-1].content
+    assert "decided in the terminal" in channel.threads[0].sent[-1].content
 
 
 def test_a_click_after_closing_is_answered_but_not_delivered(
@@ -883,7 +883,7 @@ def test_a_click_after_closing_is_answered_but_not_delivered(
     instance.submit_gate("g1", "Shell Command", "ls")
     gateway.wait_idle()
     message = posted_gate(channel)
-    instance.close_gate("g1", "im Terminal entschieden")
+    instance.close_gate("g1", "decided in the terminal")
     gateway.wait_idle()
 
     interaction = click(message.view, approvals_ui.APPROVE_LABEL)
@@ -1118,7 +1118,7 @@ def test_ac17_a_gate_whose_post_explodes_warns_differently(channel, caplog):
 
 
 def test_ac17_the_two_warnings_are_distinguishable(channel, caplog):
-    """R6.1: "unterscheidbar" is the requirement, so it gets its own test."""
+    """R6.1: "distinguishable" is the requirement, so it gets its own test."""
 
     class ExplodingThread(FakeThread):
         async def send(self, content, **kwargs):

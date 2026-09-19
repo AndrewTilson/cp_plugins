@@ -3,7 +3,7 @@
 Two properties of :func:`.broker_activation.connect_gateway` that no single
 send site can be trusted to re-establish:
 
-**Mentions are suppressed for every send** (Befund 1).  ``approvals_ui.py:34``
+**Mentions are suppressed for every send** (Finding 1).  ``approvals_ui.py:34``
 advertises suppression as a security property, but only the gate path passed
 ``allowed_mentions`` -- ``broker_threads.py`` ``_post_to``, which carries every
 state edge (``broker_server.py:315``) and every report chunk (``:330``), did
@@ -16,7 +16,7 @@ folds ``state.allowed_mentions`` into every outgoing message
 (``discord/abc.py:1623-1630``), so the guarantee belongs to the connection and
 a newly added send path inherits it instead of having to remember it.
 
-**No privileged intent for a path that does not exist** (Befund 2).
+**No privileged intent for a path that does not exist** (Finding 2).
 ``message_content`` is a privileged intent; the bot registered ``on_ready``
 and nothing else, so it was collecting guild-wide message text it never read.
 
@@ -64,7 +64,7 @@ class _RecordingClient:
 
     def event(self, coro):
         # ``connect_gateway`` registers its handlers through this decorator;
-        # recording the NAMES is what lets Befund 2 assert that the intent
+        # recording the NAMES is what lets Finding 2 assert that the intent
         # matches the handlers that actually exist.
         self.events.append(coro.__name__)
         return coro
@@ -116,7 +116,7 @@ def built(monkeypatch):
 
 
 # --------------------------------------------------------------------------- #
-# Befund 1 -- the connection pings nobody
+# Finding 1 -- the connection pings nobody
 # --------------------------------------------------------------------------- #
 
 
@@ -169,7 +169,7 @@ def test_an_everyone_in_a_report_chunk_cannot_ping(built):
 
 
 # --------------------------------------------------------------------------- #
-# Befund 2 -- no privileged intent without the handler that needs it
+# Finding 2 -- no privileged intent without the handler that needs it
 # --------------------------------------------------------------------------- #
 
 
@@ -206,7 +206,7 @@ def test_message_content_is_the_only_intent_that_was_added(built):
 
 
 def test_the_on_message_handler_is_registered_here():
-    """The load-bearing half of Befund 2, and it did its job.
+    """The load-bearing half of Finding 2, and it did its job.
 
     It was written to FAIL the day somebody added ``on_message`` without the
     intent, and to point at the comment in ``connect_gateway``.  That day has

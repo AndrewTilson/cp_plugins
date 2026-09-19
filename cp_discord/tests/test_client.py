@@ -935,7 +935,7 @@ def test_a_state_event_carries_its_local_only_marking(clients, broker, gateway):
     instance.register_now()
 
     instance.sink(
-        reporter.StateEvent(reporter.BLOCKED, "wartet auf eine Eingabe", False)
+        reporter.StateEvent(reporter.BLOCKED, "waiting for input", False)
     )
 
     body = gateway.bodies_for(instance.session_id)[0]
