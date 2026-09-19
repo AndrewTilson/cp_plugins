@@ -164,7 +164,20 @@ class Mailbox:
     # -- posting (called from hot paths: lock, assign, return) ----------
 
     def post_report(self, event: ReportEvent) -> None:
-        self._post("_report", event)
+        """Keep pending transcript chunks ordered, unlike decorative states.
+
+        A quick answer must not overwrite the terminal prompt posted just
+        before it. Bound the backlog and make any overflow visible.
+        """
+        with self._cond:
+            if self._closing:
+                return
+            pending = self._report.chunks if self._report is not None else ()
+            chunks = pending + event.chunks
+            if len(chunks) > 128:
+                chunks = ("[Earlier pending transcript chunks omitted]",) + chunks[-127:]
+            self._report = ReportEvent(chunks)
+            self._cond.notify()
 
     def post_state(self, event: StateEvent) -> None:
         self._post("_state", event)

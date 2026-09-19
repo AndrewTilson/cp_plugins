@@ -124,6 +124,7 @@ COMPONENTS: Tuple[Component, ...] = (
     Component("C2", "client"),
     Component("C3", "reporter"),
     Component("C7", "collector"),
+    Component("C9", "terminal_input"),
     Component("C4", "approvals"),
     Component("C5", "inbound"),
     Component("C8", "idle_delivery"),

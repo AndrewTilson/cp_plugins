@@ -8,6 +8,36 @@ the sofa or from the train.
 Discord connection (the "broker"); the others attach to it. If it goes away,
 another takes over within 30 seconds.
 
+## Terminal input mirroring
+
+When the bridge is enabled, CLI prompts submitted to the agent are posted to
+that session's thread as **Terminal input**, in both report and stream modes.
+The observer uses `user_prompt_submit(prompt, session_id)`, returns `None`, and
+never replaces the prompt. Reports use the existing mailbox and chunking path;
+this is best-effort reporting, not a durable transcript.
+
+**Privacy:** any terminal prompt may contain sensitive information (passwords,
+keys, private code or personal data). Enabling the bridge shares that text with
+people who can read the session thread. No attachments are uploaded by this
+feature. The text is what the core submits after attachment parsing and
+sanitization, not a byte-for-byte terminal keystroke log.
+
+This is **not a slash-command audit**: handled commands and shell passthroughs
+that do not submit a prompt are not recorded. Mid-run steering that bypasses
+`user_prompt_submit` is also outside its scope. Discord-originated idle inputs
+are not echoed; typing the same text in the terminal still produces a report.
+Subagent/nested runs and the CLI's automatic continuation prompts are excluded.
+
+Compatibility was checked against Code Puppy **0.0.851**. Its steering queue and
+idle handoff preserve a marked string, but attachment parsing and sanitization
+do not. A reversible wrapper around `cli_runner.run_prompt_with_attachments`
+carries provenance in task-local context through these conversions. Nested runs
+are rejected via `agent_execution_context`; the CLI continuation call is
+recognized by its `next_prompt` local's object identity plus the source call
+site, never by prompt text matching.
+That continuation check is core-version-sensitive and should be reviewed when
+upgrading. Calls outside the CLI wrapper are deliberately not mirrored.
+
 ---
 
 ## 1. Discord server and channel

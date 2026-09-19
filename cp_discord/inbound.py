@@ -170,7 +170,9 @@ def _default_steer(text: str, mode: str) -> None:
     """
     from code_puppy.messaging.pause_controller import get_pause_controller
 
-    get_pause_controller().request_steer(text, mode=mode)
+    from .terminal_input import DiscordPrompt
+
+    get_pause_controller().request_steer(DiscordPrompt(text), mode=mode)
 
 
 class InboundRouter:
